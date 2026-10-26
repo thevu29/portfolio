@@ -1,0 +1,11 @@
+.next
+node_modules
+pnpm-lock.yaml
+public/*.pdf
+test-results
+playwright-report
+.vitest
+.agents
+.claude
+skills-lock.json
+next-env.d.ts

@@ -1,0 +1,319 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "lenis/dist/lenis.css";
+
+/* Theme is chosen by the inline script in layout.tsx (data-theme on <html>). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Tokens follow shadcn naming so ui/ components work unchanged.
+ * muted = quiet surface, muted-foreground = secondary text,
+ * subtle = tertiary text (dates, labels), signal = the one green accent.
+ */
+:root {
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #a1a1aa;
+  --radius: 0.625rem;
+  --subtle: #a1a1aa;
+  --signal: #15803d;
+  /* Hero light rays (read by LightRays via getComputedStyle). */
+  --rays-rgb: 24 24 27;
+  --rays-alpha: 0.16;
+  /* Cursor spotlight (SpotlightBackground). */
+  --spotlight: rgb(24 24 27 / 0.04);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #111113;
+  --card-foreground: #ededed;
+  --popover: #111113;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --secondary: #18181b;
+  --secondary-foreground: #ededed;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #1f1f23;
+  --accent-foreground: #ededed;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #52525b;
+  --subtle: #71717a;
+  --signal: #4ade80;
+  --rays-rgb: 255 255 255;
+  --rays-alpha: 0.6;
+  --spotlight: rgb(255 255 255 / 0.045);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-subtle: var(--subtle);
+  --color-signal: var(--signal);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-blur-in: blur-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes wave {
+    0%,
+    60%,
+    100% {
+      transform: rotate(0deg);
+    }
+    10%,
+    30% {
+      transform: rotate(14deg);
+    }
+    20% {
+      transform: rotate(-8deg);
+    }
+    40% {
+      transform: rotate(-4deg);
+    }
+    50% {
+      transform: rotate(10deg);
+    }
+  }
+
+  @keyframes blur-in {
+    from {
+      opacity: 0;
+      filter: blur(10px);
+      transform: translateY(10px);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--signal) 25%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Shown when WebGL is unavailable: a soft beam from the top centre. */
+  .rays-fallback {
+    background: radial-gradient(
+      ellipse 60% 70% at 50% -10%,
+      rgb(var(--rays-rgb) / calc(var(--rays-alpha) * 0.5)),
+      transparent 70%
+    );
+  }
+
+  /* Film grain over the hero. */
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Engineer-paper grid used on project covers. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+/*
+ * Page slides (PageTransition + NavLink): pages read in nav order, so a later
+ * page comes in from the right and an earlier one from the left. The old page
+ * leaves fast, the new one arrives a touch slower; the nav never moves.
+ */
+::view-transition {
+  pointer-events: none;
+}
+
+.site-header {
+  view-transition-name: site-header;
+}
+
+/* A theme switch repaints the nav too: keep it in the page snapshot. */
+html[data-theme-switch] .site-header {
+  view-transition-name: none;
+}
+
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Tune the slide here: distance and timing. */
+:root {
+  --slide-distance: 160px;
+  --slide-duration: 500ms;
+  --slide-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: calc(var(--slide-distance) * -1);
+  animation:
+    200ms ease-in both page-fade reverse,
+    var(--slide-duration) var(--slide-ease) both page-slide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: var(--slide-distance);
+  animation:
+    260ms ease-out 160ms both page-fade,
+    var(--slide-duration) var(--slide-ease) both page-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: var(--slide-distance);
+  animation:
+    200ms ease-in both page-fade reverse,
+    var(--slide-duration) var(--slide-ease) both page-slide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: calc(var(--slide-distance) * -1);
+  animation:
+    260ms ease-out 160ms both page-fade,
+    var(--slide-duration) var(--slide-ease) both page-slide;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes page-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+}
+
+/*
+ * Theme switch = the sun's day (ThemeToggle sets data-theme-switch and starts a
+ * View Transition). Light: daylight spreads from the east, the bottom-right
+ * corner. Dark: daylight withdraws into the west, the bottom-left corner,
+ * uncovering the night underneath.
+ */
+/* A bottom corner to the opposite top corner: the disc covers the page. */
+:root {
+  --sun-radius: hypot(100vw, 100vh);
+}
+
+@keyframes sunrise {
+  from {
+    clip-path: circle(0 at 100% 100%);
+  }
+  to {
+    clip-path: circle(var(--sun-radius) at 100% 100%);
+  }
+}
+
+@keyframes sunset {
+  from {
+    clip-path: circle(var(--sun-radius) at 0% 100%);
+  }
+  to {
+    clip-path: circle(0 at 0% 100%);
+  }
+}
+
+html[data-theme-switch]::view-transition-old(root),
+html[data-theme-switch]::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+html[data-theme-switch="sunrise"]::view-transition-new(root) {
+  animation: sunrise 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+html[data-theme-switch="sunset"]::view-transition-old(root) {
+  z-index: 1;
+  animation: sunset 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
