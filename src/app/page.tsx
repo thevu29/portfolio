@@ -11,7 +11,6 @@ import { SpotlightCard } from "@/components/spotlight";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/nav-link";
-import { PageTransition } from "@/components/page-transition";
 
 const pill = "h-10 rounded-full px-5 text-sm";
 const iconPill = "size-10 rounded-full";
@@ -20,7 +19,7 @@ export default function HomePage() {
   const { profile, experience, projects } = cv;
 
   return (
-    <PageTransition>
+    <>
       <HeroFrame>
         <div className="grid items-center gap-12 md:grid-cols-[1.25fr_1fr]">
           <div>
@@ -145,6 +144,6 @@ export default function HomePage() {
           </Reveal>
         </section>
       </PageContainer>
-    </PageTransition>
+    </>
   );
 }

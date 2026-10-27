@@ -4,7 +4,10 @@ import { cv } from "@/content/cv";
 import { ProjectCard, ProjectLinkCard, projectAnchor } from "@/components/project-card";
 
 // NavLink reads the current route; the home page is where these cards live.
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 const project = cv.projects[1];
 

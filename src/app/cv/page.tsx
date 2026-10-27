@@ -6,7 +6,6 @@ import { PageContainer, Reveal, Rise, Section, TechChips } from "@/components/pr
 import { buttonVariants } from "@/components/ui/button";
 import { siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { PageTransition } from "@/components/page-transition";
 
 export const metadata: Metadata = {
   title: "CV",
@@ -55,7 +54,7 @@ export default function CvPage() {
   const { profile, summary, experience, projects, skills, education } = cv;
 
   return (
-    <PageTransition>
+    <>
       <HeroFrame>
         <div className="mx-auto flex max-w-3xl flex-wrap items-end justify-between gap-6">
           <div>
@@ -202,6 +201,6 @@ export default function CvPage() {
           ))}
         </Section>
       </PageContainer>
-    </PageTransition>
+    </>
   );
 }

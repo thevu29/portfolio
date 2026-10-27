@@ -3,11 +3,12 @@
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion } from "motion/react";
 import { isActive, NAV_ITEMS } from "@/lib/nav";
-import { NavLink } from "./nav-link";
+import { NavLink, useSlideArrival } from "./nav-link";
 import { ThemeToggle } from "./theme-toggle";
 
 export function SiteNav() {
   const pathname = usePathname();
+  useSlideArrival(); // lets a running page slide capture the new route
 
   return (
     // The header is position: fixed, so the pill's layout animation must

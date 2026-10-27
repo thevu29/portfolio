@@ -4,7 +4,6 @@ import { HeroFrame } from "@/components/hero-frame";
 import { PageContainer, PageHeader, Reveal } from "@/components/primitives";
 import { ProjectCard } from "@/components/project-card";
 import { SpotlightCard } from "@/components/spotlight";
-import { PageTransition } from "@/components/page-transition";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <PageTransition>
+    <>
       <HeroFrame>
         <PageHeader
           eyebrow="Projects"
@@ -33,6 +32,6 @@ export default function ProjectsPage() {
           ))}
         </div>
       </PageContainer>
-    </PageTransition>
+    </>
   );
 }

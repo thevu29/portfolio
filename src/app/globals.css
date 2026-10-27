@@ -188,9 +188,10 @@
 }
 
 /*
- * Page slides (PageTransition + NavLink): pages read in nav order, so a later
- * page comes in from the right and an earlier one from the left. The old page
- * leaves fast, the new one arrives a touch slower; the nav never moves.
+ * Page slides (NavLink starts a whole-page View Transition): pages read in
+ * nav order, so a later page comes in from the right and an earlier one from
+ * the left. The old page leaves fast, the new one arrives a touch slower; the
+ * nav never moves.
  */
 ::view-transition {
   pointer-events: none;
@@ -219,10 +220,9 @@ html[data-theme-switch] .site-header {
 }
 
 /*
- * Keyed on <html data-slide> (set by NavLink), not on the .nav-forward class
- * React puts on the page: iOS Safari ignored that class and played the
- * default in-place crossfade. (*) covers whatever React named, root included.
- * Literal values only (no var()) inside view-transition pseudos: custom
+ * Keyed on <html data-slide>, set by NavLink for the length of its own View
+ * Transition. (*) covers the root snapshot (the page); the nav is excluded
+ * above. Literal values only (no var()) inside view-transition pseudos: custom
  * properties there are not reliable on iOS. Tuning: 160px distance, 500ms
  * slide, old page fades out in 160ms, new page fades in after it (no overlap).
  */

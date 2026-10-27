@@ -13,7 +13,6 @@ import {
 import { StackPhysics } from "@/components/stack-physics";
 import { Badge } from "@/components/ui/badge";
 import { stackSkills } from "@/lib/tech";
-import { PageTransition } from "@/components/page-transition";
 
 export const metadata: Metadata = {
   title: "About",
@@ -24,7 +23,7 @@ export default function AboutPage() {
   const { profile, summary, experience, education, capabilities } = cv;
 
   return (
-    <PageTransition>
+    <>
       <HeroFrame>
         <PageHeader
           eyebrow="About"
@@ -78,6 +77,6 @@ export default function AboutPage() {
           </Section>
         </div>
       </PageContainer>
-    </PageTransition>
+    </>
   );
 }
