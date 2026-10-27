@@ -6,6 +6,7 @@ import { MotionProvider } from "@/components/reveal";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { SpotlightBackground } from "@/components/spotlight";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { VtDebug } from "@/components/vt-debug";
 import { metadataBaseUrl, siteUrl } from "@/lib/site";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -60,6 +61,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SpotlightBackground />
+        {/* TEMPORARY: ?vtdebug=1 on-device view-transition diagnostics. */}
+        <VtDebug />
         <SmoothScroll>
           <MotionProvider>
             <TooltipProvider delay={200}>

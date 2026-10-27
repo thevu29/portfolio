@@ -82,10 +82,13 @@ test.describe("page slides (pages read in nav order)", () => {
         for (const a of document.getAnimations()) {
           const effect = a.effect as KeyframeEffect | null;
           const name = (a as CSSAnimation).animationName;
-          if (name !== "page-slide" || !effect?.pseudoElement) continue;
+          if (!name?.startsWith("page-slide") || !effect?.pseudoElement) continue;
           const side = effect.pseudoElement.includes("old") ? "old" : "new";
           // Direction only (sign of the resolved offset), so the distance can be tuned.
-          const offset = String(effect.getKeyframes()[0]?.translate ?? "");
+          const offset = String(
+            effect.getKeyframes().find((k) => k.translate && k.translate !== "none")?.translate ??
+              "",
+          );
           const entry = `${side}:${offset.startsWith("-") ? "left" : "right"}`;
           if (!seen.includes(entry)) seen.push(entry);
         }
@@ -133,7 +136,7 @@ test.describe("page slides (pages read in nav order)", () => {
       const sample = () => {
         for (const a of document.getAnimations()) {
           const pseudo = (a.effect as KeyframeEffect | null)?.pseudoElement ?? "";
-          if ((a as CSSAnimation).animationName !== "page-fade" || !pseudo) continue;
+          if (!(a as CSSAnimation).animationName?.startsWith("page-fade") || !pseudo) continue;
           const side = pseudo.includes("old") ? "old" : "new";
           if (fades.some((f) => f.side === side)) continue;
           const { delay = 0, duration = 0 } = a.effect!.getComputedTiming();
@@ -201,7 +204,7 @@ test.describe("page slides (pages read in nav order)", () => {
     const running = await page.evaluate(() =>
       document
         .getAnimations()
-        .filter((a) => (a as CSSAnimation).animationName === "page-slide")
+        .filter((a) => (a as CSSAnimation).animationName?.startsWith("page-slide"))
         .map((a) => a.effect?.getComputedTiming().duration),
     );
     expect(running.every((d) => d === 0)).toBe(true);
