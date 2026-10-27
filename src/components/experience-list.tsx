@@ -70,7 +70,7 @@ export function ExperienceList({ experience }: { experience: Experience[] }) {
         const headingId = `exp-${exp.company.toLowerCase().replace(/\W+/g, "-")}`;
         return (
           <article key={exp.company} aria-labelledby={headingId}>
-            <header className="flex items-center gap-4">
+            <header className="reveal flex items-center gap-4">
               <OrgLogo name={exp.company} logo={exp.logo} />
               <div className="min-w-0">
                 <h3 id={headingId} className="text-base font-medium">
@@ -96,7 +96,7 @@ export function ExperienceList({ experience }: { experience: Experience[] }) {
 
             <ol className="relative mt-6 ml-6 space-y-8 border-l pl-8">
               {exp.roles.map((role, i) => (
-                <li key={role.title} className="relative">
+                <li key={role.title} className="reveal relative">
                   <span
                     aria-hidden="true"
                     className={`ring-card absolute top-1.5 -left-[37px] size-2.5 rounded-full ring-4 ${
@@ -125,7 +125,7 @@ export function EducationList({ education }: { education: Education[] }) {
   return (
     <Panel className="space-y-6 p-5 sm:p-7">
       {education.map((edu) => (
-        <article key={edu.school} className="flex items-center gap-4">
+        <article key={edu.school} className="reveal flex items-center gap-4">
           <OrgLogo name={edu.school} logo={edu.logo} />
           <div className="min-w-0">
             <h3 className="font-medium">{edu.school}</h3>

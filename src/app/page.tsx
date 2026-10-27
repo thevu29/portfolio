@@ -5,12 +5,10 @@ import { ExperienceList } from "@/components/experience-list";
 import { HeroFrame } from "@/components/hero-frame";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
 import { PortraitCard } from "@/components/portrait-card";
-import { PageContainer, Rise, SectionHeading } from "@/components/primitives";
+import { PageContainer, Reveal, Rise, SectionHeading } from "@/components/primitives";
 import { ProjectLinkCard } from "@/components/project-card";
-import { Reveal } from "@/components/reveal";
 import { SpotlightCard } from "@/components/spotlight";
 import { buttonVariants } from "@/components/ui/button";
-import { STAGGER } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/nav-link";
 import { PageTransition } from "@/components/page-transition";
@@ -73,17 +71,15 @@ export default function HomePage() {
 
       <PageContainer className="mt-24">
         <section aria-labelledby="work-heading">
-          <Reveal>
-            <SectionHeading
-              id="work-heading"
-              eyebrow="Selected work"
-              title="Things I've shipped"
-              description="Client and product work from the last two years: e-commerce, multi-site delivery, warehouse operations and real-time apps."
-            />
-          </Reveal>
+          <SectionHeading
+            id="work-heading"
+            eyebrow="Selected work"
+            title="Things I've shipped"
+            description="Client and product work from the last two years: e-commerce, multi-site delivery, warehouse operations and real-time apps."
+          />
           <div className="grid gap-4 sm:grid-cols-2">
-            {projects.map((project, i) => (
-              <Reveal key={project.slug} delay={(i % 2) * STAGGER}>
+            {projects.map((project) => (
+              <Reveal key={project.slug}>
                 <SpotlightCard>
                   <ProjectLinkCard project={project} />
                 </SpotlightCard>
@@ -98,16 +94,8 @@ export default function HomePage() {
         </section>
 
         <section aria-labelledby="experience-heading" className="mx-auto mt-32 max-w-3xl">
-          <Reveal>
-            <SectionHeading
-              id="experience-heading"
-              eyebrow="Experience"
-              title="Where I've worked"
-            />
-          </Reveal>
-          <Reveal>
-            <ExperienceList experience={experience} />
-          </Reveal>
+          <SectionHeading id="experience-heading" eyebrow="Experience" title="Where I've worked" />
+          <ExperienceList experience={experience} />
         </section>
 
         <section aria-labelledby="contact-heading" className="mt-32">

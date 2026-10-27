@@ -124,6 +124,47 @@ test.describe("page slides (pages read in nav order)", () => {
       .toEqual(expect.arrayContaining(["old:right", "new:left"]));
   });
 
+  test("the old page is gone before the new one shows (no overlap)", async ({ page }) => {
+    await page.goto("/");
+    await hydrated(page);
+    await page.evaluate(() => {
+      const fades: { side: string; start: number; end: number }[] = [];
+      (window as unknown as { __fades: typeof fades }).__fades = fades;
+      const sample = () => {
+        for (const a of document.getAnimations()) {
+          const pseudo = (a.effect as KeyframeEffect | null)?.pseudoElement ?? "";
+          if ((a as CSSAnimation).animationName !== "page-fade" || !pseudo) continue;
+          const side = pseudo.includes("old") ? "old" : "new";
+          if (fades.some((f) => f.side === side)) continue;
+          const { delay = 0, duration = 0 } = a.effect!.getComputedTiming();
+          fades.push({ side, start: Number(delay), end: Number(delay) + Number(duration) });
+        }
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+    await nav(page).getByRole("link", { name: "Projects" }).click();
+    const fades = await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __fades: { side: string; start: number; end: number }[] })
+              .__fades,
+        ),
+      )
+      .toHaveLength(2)
+      .then(() =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __fades: { side: string; start: number; end: number }[] })
+              .__fades,
+        ),
+      );
+    const old = fades.find((f) => f.side === "old")!;
+    const next = fades.find((f) => f.side === "new")!;
+    expect(next.start).toBeGreaterThanOrEqual(old.end);
+  });
+
   test("the nav stays put while the page slides", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("header").first()).toHaveCSS("view-transition-name", "site-header");
@@ -411,6 +452,55 @@ test.describe("stack physics", () => {
     await expect.poll(() => chipTransforms(page)).not.toEqual(settled);
   });
 
+  test("a chip can be dragged with the mouse", async ({ page }) => {
+    await enterPhysics(page);
+    // Let the pile (and the page) come to rest so the chip stays under the cursor.
+    const state = () =>
+      page.evaluate(
+        () =>
+          `${window.scrollY}|` +
+          [...document.querySelectorAll<HTMLElement>("[data-chip]")]
+            .map((el) => el.style.transform)
+            .join("|"),
+      );
+    await expect(async () => {
+      const before = await state();
+      await page.waitForTimeout(400);
+      expect(await state()).toBe(before);
+    }).toPass(MATTER_LOAD);
+    const chip = await box(page)
+      .locator("[data-chip]")
+      .evaluateAll((els) => {
+        const hittable = els
+          .map((el, index) => {
+            const r = el.getBoundingClientRect();
+            return { el, index, x: r.left + r.width / 2, y: r.top + r.height / 2 };
+          })
+          .filter(({ el, x, y }) => document.elementFromPoint(x, y)?.closest("[data-chip]") === el);
+        const { index, x, y } = hittable.reduce((a, b) => (b.y < a.y ? b : a));
+        return { index, x, y };
+      });
+    const target = box(page).locator("[data-chip]").nth(chip.index);
+    // Pull towards the middle of the box so a wall never blocks the drag.
+    const frame = (await box(page).boundingBox())!;
+    const dx = chip.x < frame.x + frame.width / 2 ? 120 : -120;
+
+    await page.mouse.move(chip.x, chip.y);
+    await page.mouse.down();
+    await expect(target).toHaveAttribute("data-grabbed");
+    await page.mouse.move(chip.x + dx, chip.y - 60, { steps: 12 });
+    await page.waitForTimeout(300);
+    const moved = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    });
+    await page.mouse.up();
+
+    expect(Math.sign(moved.x - chip.x)).toBe(Math.sign(dx));
+    expect(Math.abs(moved.x - chip.x)).toBeGreaterThan(60);
+    await expect(target).not.toHaveAttribute("data-grabbed");
+  });
+
   test("reduced motion shows a static list of every skill", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/about");
@@ -434,6 +524,54 @@ test.describe("mobile", () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
+});
+
+test.describe("scroll reveal", () => {
+  /** Scroll-driven animations on an element: name and timeline. */
+  const revealAnimations = (page: Page, selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) =>
+        el.getAnimations().map((a) => ({
+          name: (a as CSSAnimation).animationName,
+          scrollLinked: !(a.timeline instanceof DocumentTimeline),
+        })),
+      );
+
+  test("timeline roles and section headings reveal with the scroll, both ways", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/about");
+    for (const selector of ["article li.reveal", "section .reveal"]) {
+      const animations = await revealAnimations(page, selector);
+      expect(animations).toEqual(
+        expect.arrayContaining([
+          { name: "reveal-in", scrollLinked: true },
+          { name: "reveal-out", scrollLinked: true },
+        ]),
+      );
+    }
+  });
+
+  test("content below the fold starts hidden and shows once scrolled to", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize({ width: 430, height: 932 }); // iPhone Pro Max
+    await page.goto("/about");
+    const lastRole = page.locator("article li.reveal").last();
+    const opacity = () => lastRole.evaluate((el) => Number(getComputedStyle(el).opacity));
+    expect(await opacity()).toBeLessThan(0.1);
+    await lastRole.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect.poll(opacity).toBeGreaterThan(0.95);
+  });
+
+  test("is off under prefers-reduced-motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/about");
+    expect(await revealAnimations(page, ".reveal")).toEqual([]);
+    await expect(page.locator(".reveal").last()).toHaveCSS("opacity", "1");
+  });
 });
 
 test.describe("entrance animation", () => {

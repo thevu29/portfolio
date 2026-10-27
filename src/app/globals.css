@@ -218,38 +218,44 @@ html[data-theme-switch] .site-header {
   animation: none;
 }
 
-/* Tune the slide here: distance and timing. */
+/*
+ * Tune the slide here: distance and timing. The old page is fully faded out
+ * before the new one starts to show (fade-in delay = fade-out duration), so
+ * the two never overlap.
+ */
 :root {
   --slide-distance: 160px;
   --slide-duration: 500ms;
   --slide-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --slide-fade-out: 160ms;
+  --slide-fade-in: 280ms;
 }
 
 ::view-transition-old(.nav-forward) {
   --slide-offset: calc(var(--slide-distance) * -1);
   animation:
-    200ms ease-in both page-fade reverse,
+    var(--slide-fade-out) ease-in both page-fade reverse,
     var(--slide-duration) var(--slide-ease) both page-slide reverse;
 }
 
 ::view-transition-new(.nav-forward) {
   --slide-offset: var(--slide-distance);
   animation:
-    260ms ease-out 160ms both page-fade,
+    var(--slide-fade-in) ease-out var(--slide-fade-out) both page-fade,
     var(--slide-duration) var(--slide-ease) both page-slide;
 }
 
 ::view-transition-old(.nav-back) {
   --slide-offset: var(--slide-distance);
   animation:
-    200ms ease-in both page-fade reverse,
+    var(--slide-fade-out) ease-in both page-fade reverse,
     var(--slide-duration) var(--slide-ease) both page-slide reverse;
 }
 
 ::view-transition-new(.nav-back) {
   --slide-offset: calc(var(--slide-distance) * -1);
   animation:
-    260ms ease-out 160ms both page-fade,
+    var(--slide-fade-in) ease-out var(--slide-fade-out) both page-fade,
     var(--slide-duration) var(--slide-ease) both page-slide;
 }
 
@@ -315,5 +321,53 @@ html[data-theme-switch="sunset"]::view-transition-old(root) {
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+}
+
+/*
+ * Scroll reveal (Reveal / .reveal): progress follows the scroll position, so
+ * it plays on the way down (rise in from below) and back on the way up (drift
+ * out at the top, return when scrolled back). Ranges are lengths, so tall and
+ * short blocks move alike: in over the first --reveal-in-range after the top
+ * edge shows, out over the last --reveal-out-range before the bottom edge
+ * leaves. Composite-only properties (opacity, translate, scale) keep it smooth
+ * on phones. Not used around StackPhysics: scale would skew its pointer maths.
+ */
+:root {
+  --reveal-distance: 96px;
+  --reveal-scale: 0.94;
+  --reveal-in-range: 45vh;
+  --reveal-out-distance: -48px;
+  --reveal-out-scale: 0.96;
+  --reveal-out-range: 30vh;
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--reveal-distance);
+    scale: var(--reveal-scale);
+  }
+}
+
+@keyframes reveal-out {
+  to {
+    opacity: 0;
+    translate: 0 var(--reveal-out-distance);
+    scale: var(--reveal-out-scale);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation:
+        reveal-in ease-out both,
+        reveal-out ease-in both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% entry var(--reveal-in-range),
+        exit calc(100% - var(--reveal-out-range)) exit 100%;
+    }
   }
 }

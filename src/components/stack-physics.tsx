@@ -18,10 +18,15 @@ const DROP_SPREAD = 0.7;
 // Step by real elapsed time (same speed at 60/120/144 Hz), capped at Matter's
 // recommended max delta so a resumed tab doesn't teleport the chips.
 const MAX_STEP_MS = 1000 / 60;
+// A random pile fills about this share of the floor area it covers; the box
+// grows (narrow phones) so every chip lands inside it, never above the clip.
+const PILE_DENSITY = 0.55;
 
-// @types/matter-js omits Mouse's DOM handlers (present at runtime, see
-// Mouse.setElement in matter-js/build/matter.js).
-type MouseHandlers = Record<"mousemove" | "mousedown" | "mouseup" | "mousewheel", EventListener>;
+// Touch: a chip is grabbed only after a short press-and-hold, so a swipe over
+// the pile still scrolls the page. A finger that drifts further than the slop
+// during the hold is a scroll, not a grab.
+const HOLD_MS = 180;
+const HOLD_SLOP = 8;
 
 interface World {
   engine: MatterNS.Engine;
@@ -34,7 +39,7 @@ function Chip({ tech }: { tech: TechIconData }) {
   return (
     <span
       data-chip
-      className="inline-flex items-center gap-2 rounded-xl border border-black/10 py-1.5 pr-3.5 pl-1.5 text-sm font-medium whitespace-nowrap shadow-sm select-none"
+      className="inline-flex items-center gap-2 rounded-xl border border-black/10 py-1.5 pr-3.5 pl-1.5 text-sm font-medium whitespace-nowrap shadow-sm transition-shadow select-none [-webkit-touch-callout:none] data-grabbed:shadow-xl data-grabbed:ring-2 data-grabbed:ring-white/70"
       style={{ backgroundColor: tech.hex, color: readableTextOn(tech.hex) }}
     >
       <TechIcon tech={tech} size={26} />
@@ -43,7 +48,17 @@ function Chip({ tech }: { tech: TechIconData }) {
   );
 }
 
+/** Tall enough for the whole pile at the current width (CSS height is the floor). */
+function fitPile(box: HTMLElement): void {
+  const area = [...box.querySelectorAll<HTMLElement>("[data-chip]")].reduce(
+    (sum, el) => sum + el.offsetWidth * el.offsetHeight,
+    0,
+  );
+  box.style.minHeight = `${Math.ceil(area / (box.clientWidth * PILE_DENSITY))}px`;
+}
+
 function buildWorld(M: Matter, box: HTMLElement): World {
+  fitPile(box);
   const width = box.clientWidth;
   const height = box.clientHeight;
   const engine = M.Engine.create({ enableSleeping: true });
@@ -74,30 +89,110 @@ function buildWorld(M: Matter, box: HTMLElement): World {
   return { engine, chips, width, height };
 }
 
-function attachMouse(M: Matter, world: World, box: HTMLElement): () => void {
-  // Touch screens keep native scrolling: no dragging there.
-  if (!matchMedia("(pointer: fine)").matches) return () => {};
-  const mouse = M.Mouse.create(box);
-  const handlers = mouse as unknown as MouseHandlers;
-  // Matter grabs wheel/touch events (passive: false, preventDefault) and would
-  // block page scroll, also on touch laptops that report a fine pointer.
-  box.removeEventListener("wheel", handlers.mousewheel);
-  box.removeEventListener("touchmove", handlers.mousemove);
-  box.removeEventListener("touchstart", handlers.mousedown);
-  box.removeEventListener("touchend", handlers.mouseup);
-  // Matter only hears mouseup inside the box: release a drag that leaves it.
-  box.addEventListener("mouseleave", handlers.mouseup);
-  const constraint = M.MouseConstraint.create(world.engine, {
-    mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } },
-  });
-  M.Composite.add(world.engine.world, constraint);
-  return () => {
-    M.Mouse.clearSourceEvents(mouse);
-    for (const type of ["mousemove", "mousedown", "mouseup"] as const) {
-      box.removeEventListener(type, handlers[type]);
+/**
+ * Drag chips with any pointer (Pointer Events, not Matter's Mouse, which
+ * blocks touch scrolling): mouse grabs at once, touch after HOLD_MS. The grab
+ * is a spring between the pointer and the point on the chip that was pressed.
+ */
+function attachPointer(M: Matter, world: World, box: HTMLElement): () => void {
+  let drag: { id: number; constraint: MatterNS.Constraint; el: HTMLElement } | null = null;
+  let hold: { id: number; timer: number; x: number; y: number; el: HTMLElement } | null = null;
+
+  const local = (clientX: number, clientY: number) => {
+    const rect = box.getBoundingClientRect();
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const grab = (id: number, el: HTMLElement, clientX: number, clientY: number) => {
+    const chip = world.chips.find((c) => c.el === el);
+    if (!chip) return;
+    const point = local(clientX, clientY);
+    const { body } = chip;
+    M.Sleeping.set(body, false);
+    // Same feel as Matter's MouseConstraint; angularStiffness exists at
+    // runtime (Constraint.create) but not in @types/matter-js.
+    const constraint = M.Constraint.create({
+      pointA: point,
+      bodyB: body,
+      pointB: { x: point.x - body.position.x, y: point.y - body.position.y },
+      length: 0.01,
+      stiffness: 0.2,
+      angularStiffness: 1,
+    } as MatterNS.IConstraintDefinition);
+    M.Composite.add(world.engine.world, constraint);
+    try {
+      box.setPointerCapture(id); // keep the drag when the pointer leaves the box
+    } catch {
+      // Pointer already gone (released during the hold).
     }
-    box.removeEventListener("mouseleave", handlers.mouseup);
+    el.dataset.grabbed = "";
+    drag = { id, constraint, el };
+  };
+
+  const cancelHold = () => {
+    if (hold) window.clearTimeout(hold.timer);
+    hold = null;
+  };
+
+  const release = () => {
+    cancelHold();
+    if (!drag) return;
+    M.Composite.remove(world.engine.world, drag.constraint);
+    delete drag.el.dataset.grabbed;
+    drag = null;
+  };
+
+  const onDown = (e: PointerEvent) => {
+    const el = (e.target as Element).closest<HTMLElement>("[data-chip]");
+    if (!el || drag || hold) return;
+    if (e.pointerType === "mouse") {
+      if (e.button === 0) grab(e.pointerId, el, e.clientX, e.clientY);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      if (hold) grab(hold.id, hold.el, hold.x, hold.y);
+      hold = null;
+    }, HOLD_MS);
+    hold = { id: e.pointerId, timer, x: e.clientX, y: e.clientY, el };
+  };
+
+  const onMove = (e: PointerEvent) => {
+    if (hold?.id === e.pointerId) {
+      if (Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > HOLD_SLOP) cancelHold();
+      return;
+    }
+    if (drag?.id !== e.pointerId) return;
+    drag.constraint.pointA = local(e.clientX, e.clientY);
+    M.Sleeping.set(drag.constraint.bodyB!, false);
+  };
+
+  const onUp = (e: PointerEvent) => {
+    if (hold?.id === e.pointerId || drag?.id === e.pointerId) release();
+  };
+
+  // While a chip is held, the finger moves the chip, not the page.
+  const onTouchMove = (e: TouchEvent) => {
+    if (drag) e.preventDefault();
+  };
+  // Long-press would open the callout/context menu on phones.
+  const onContextMenu = (e: Event) => {
+    if ((e.target as Element).closest("[data-chip]")) e.preventDefault();
+  };
+
+  box.addEventListener("pointerdown", onDown);
+  box.addEventListener("pointermove", onMove);
+  box.addEventListener("pointerup", onUp);
+  box.addEventListener("pointercancel", onUp);
+  box.addEventListener("touchmove", onTouchMove, { passive: false });
+  box.addEventListener("contextmenu", onContextMenu);
+  return () => {
+    release();
+    box.removeEventListener("pointerdown", onDown);
+    box.removeEventListener("pointermove", onMove);
+    box.removeEventListener("pointerup", onUp);
+    box.removeEventListener("pointercancel", onUp);
+    box.removeEventListener("touchmove", onTouchMove);
+    box.removeEventListener("contextmenu", onContextMenu);
   };
 }
 
@@ -136,7 +231,7 @@ export function StackPhysics({ items }: { items: TechIconData[] }) {
     if (mode !== "physics" || !M || !box) return;
 
     let world = buildWorld(M, box);
-    let detachMouse = attachMouse(M, world, box);
+    let detachPointer = attachPointer(M, world, box);
     let frame = 0;
     // Timestamp of the previous frame; unset after a pause.
     let last: number | undefined;
@@ -172,10 +267,10 @@ export function StackPhysics({ items }: { items: TechIconData[] }) {
     const ro = new ResizeObserver(() => {
       if (box.clientWidth === lastWidth) return;
       lastWidth = box.clientWidth;
-      detachMouse();
+      detachPointer();
       M.Engine.clear(world.engine);
       world = buildWorld(M, box);
-      detachMouse = attachMouse(M, world, box);
+      detachPointer = attachPointer(M, world, box);
     });
     ro.observe(box);
     document.addEventListener("visibilitychange", sync);
@@ -187,7 +282,7 @@ export function StackPhysics({ items }: { items: TechIconData[] }) {
       io.disconnect();
       ro.disconnect();
       document.removeEventListener("visibilitychange", sync);
-      detachMouse();
+      detachPointer();
       M.Engine.clear(world.engine);
     };
   }, [mode, generation]);

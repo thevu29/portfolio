@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { cv } from "@/content/cv";
 import { HeroFrame } from "@/components/hero-frame";
-import { PageContainer, PageHeader } from "@/components/primitives";
+import { PageContainer, PageHeader, Reveal } from "@/components/primitives";
 import { ProjectCard } from "@/components/project-card";
-import { Reveal } from "@/components/reveal";
 import { SpotlightCard } from "@/components/spotlight";
 import { PageTransition } from "@/components/page-transition";
 

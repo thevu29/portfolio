@@ -2,8 +2,14 @@ import type { Metadata } from "next";
 import { cv } from "@/content/cv";
 import { EducationList, ExperienceList } from "@/components/experience-list";
 import { HeroFrame } from "@/components/hero-frame";
-import { ContactLinks, PageContainer, PageHeader, Panel, Section } from "@/components/primitives";
-import { Reveal } from "@/components/reveal";
+import {
+  ContactLinks,
+  PageContainer,
+  PageHeader,
+  Panel,
+  Reveal,
+  Section,
+} from "@/components/primitives";
 import { StackPhysics } from "@/components/stack-physics";
 import { Badge } from "@/components/ui/badge";
 import { stackSkills } from "@/lib/tech";
@@ -37,15 +43,11 @@ export default function AboutPage() {
 
         <div className="mt-20">
           <Section index="01" title="Experience">
-            <Reveal>
-              <ExperienceList experience={experience} />
-            </Reveal>
+            <ExperienceList experience={experience} />
           </Section>
 
           <Section index="02" title="Education">
-            <Reveal>
-              <EducationList education={education} />
-            </Reveal>
+            <EducationList education={education} />
           </Section>
 
           <Section index="03" title="What I do">
@@ -68,11 +70,10 @@ export default function AboutPage() {
           </Section>
 
           <Section index="04" title="Stack">
-            <Reveal>
-              <StackPhysics items={stackSkills(cv)} />
-            </Reveal>
+            {/* No Reveal: its scale would skew the drag maths; the chips drop in anyway. */}
+            <StackPhysics items={stackSkills(cv)} />
             <p className="text-subtle mt-3 text-center font-mono text-xs">
-              Drag the chips around · ↻ to drop them again
+              Drag the chips around (press and hold on touch) · ↻ to drop them again
             </p>
           </Section>
         </div>

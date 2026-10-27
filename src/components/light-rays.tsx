@@ -41,7 +41,12 @@ void main() {
 }
 `;
 
-const MAX_DPR = 1.5;
+// The rays are soft gradients: half the CSS resolution looks the same once the
+// browser upscales the canvas, at a quarter of the pixels. With a 30fps cap
+// for a slow drift, this keeps the GPU free for page work (navigations on
+// phones were waiting on it, and on reading the canvas back for the slide).
+const RENDER_SCALE = 0.5;
+const FRAME_MS = 1000 / 30;
 const STATIC_TIME = 2.0;
 
 type Mode = "webgl" | "static" | "fallback";
@@ -124,20 +129,23 @@ export function LightRays({ className = "" }: { className?: string }) {
     setMode(animate ? "webgl" : "static");
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       const { width, height } = canvas.getBoundingClientRect();
-      canvas.width = Math.max(1, Math.round(width * dpr));
-      canvas.height = Math.max(1, Math.round(height * dpr));
+      canvas.width = Math.max(1, Math.round(width * RENDER_SCALE));
+      canvas.height = Math.max(1, Math.round(height * RENDER_SCALE));
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.uniform2f(uRes, canvas.width, canvas.height);
       if (!animate) draw(STATIC_TIME);
     };
 
     let frame = 0;
+    let lastDraw = 0;
     let visible = true;
     const start = performance.now();
     const loop = (now: number) => {
-      draw((now - start) / 1000);
+      if (now - lastDraw >= FRAME_MS) {
+        lastDraw = now;
+        draw((now - start) / 1000);
+      }
       frame = requestAnimationFrame(loop);
     };
     const sync = () => {

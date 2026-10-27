@@ -40,6 +40,16 @@ export function Rise({ children, step = 0, className }: RiseProps) {
   );
 }
 
+/**
+ * Below-the-fold reveal tied to the scroll (CSS scroll-driven animation, see
+ * .reveal in globals.css): rises in from below, drifts out at the top, and
+ * plays back when scrolling up. No JS; static where unsupported or with
+ * reduced motion. Use on item-sized blocks, not whole pages.
+ */
+export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("reveal", className)}>{children}</div>;
+}
+
 interface PageHeaderProps {
   eyebrow: string;
   title: string;
@@ -88,7 +98,7 @@ export function Section({ index, title, children, id, className }: SectionProps)
     <section id={id} aria-labelledby={headingId} className={cn("mt-24 first:mt-0", className)}>
       <h2
         id={headingId}
-        className="text-muted-foreground mb-6 font-mono text-xs tracking-wide uppercase"
+        className="reveal text-muted-foreground mb-6 font-mono text-xs tracking-wide uppercase"
       >
         <span className="text-subtle">{index}</span> — {title}
       </h2>
@@ -107,7 +117,7 @@ interface SectionHeadingProps {
 /** Large centered heading that opens a home-page section. */
 export function SectionHeading({ eyebrow, title, description, id }: SectionHeadingProps) {
   return (
-    <div className="mx-auto mb-12 max-w-xl text-center">
+    <div className="reveal mx-auto mb-12 max-w-xl text-center">
       <p className="text-muted-foreground font-mono text-xs tracking-widest uppercase">{eyebrow}</p>
       <h2 id={id} className="mt-3 text-3xl font-medium tracking-tight text-balance sm:text-5xl">
         {title}
