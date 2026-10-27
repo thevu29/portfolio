@@ -1,5 +1,7 @@
 import { ArrowRightIcon, DownloadIcon, MailIcon } from "lucide-react";
+import type { Metadata } from "next";
 import { cv, CV_PDF_FILENAME, CV_PDF_PATH } from "@/content/cv";
+import { HOME_COPY } from "@/content/pages";
 import { BlurText } from "@/components/blur-text";
 import { ExperienceList } from "@/components/experience-list";
 import { HeroFrame } from "@/components/hero-frame";
@@ -11,6 +13,10 @@ import { SpotlightCard } from "@/components/spotlight";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/nav-link";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/", types: { "text/markdown": "/index.md" } },
+};
 
 const pill = "h-10 rounded-full px-5 text-sm";
 const iconPill = "size-10 rounded-full";
@@ -35,12 +41,11 @@ export default function HomePage() {
               </p>
             </Rise>
             <h1 className="mt-4 text-4xl leading-[1.05] font-medium tracking-tight text-balance sm:text-6xl">
-              <BlurText text="Software engineer building reliable web products." delay={0.1} />
+              <BlurText text={HOME_COPY.headline} delay={0.1} />
             </h1>
             <Rise step={3}>
               <p className="text-muted-foreground mt-6 max-w-lg text-lg leading-relaxed text-pretty">
-                Full-stack with React and Next.js up front, NestJS services, queues and caches
-                behind them, and a bias for code that stays easy to change.
+                {HOME_COPY.intro}
               </p>
             </Rise>
             <Rise step={4} className="mt-8 flex flex-wrap gap-3">
@@ -72,9 +77,9 @@ export default function HomePage() {
         <section aria-labelledby="work-heading">
           <SectionHeading
             id="work-heading"
-            eyebrow="Selected work"
-            title="Things I've shipped"
-            description="Client and product work from the last two years: e-commerce, multi-site delivery, warehouse operations and real-time apps."
+            eyebrow={HOME_COPY.work.eyebrow}
+            title={HOME_COPY.work.title}
+            description={HOME_COPY.work.description}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             {projects.map((project) => (
@@ -93,7 +98,11 @@ export default function HomePage() {
         </section>
 
         <section aria-labelledby="experience-heading" className="mx-auto mt-32 max-w-3xl">
-          <SectionHeading id="experience-heading" eyebrow="Experience" title="Where I've worked" />
+          <SectionHeading
+            id="experience-heading"
+            eyebrow="Experience"
+            title={HOME_COPY.experienceTitle}
+          />
           <ExperienceList experience={experience} />
         </section>
 
@@ -111,11 +120,10 @@ export default function HomePage() {
                 id="contact-heading"
                 className="mt-3 text-3xl font-medium tracking-tight sm:text-5xl"
               >
-                Let&apos;s build something.
+                {HOME_COPY.contact.title}
               </h2>
               <p className="text-muted-foreground mx-auto mt-4 max-w-md leading-relaxed">
-                Open to software engineering roles and interesting projects. Email is the fastest
-                way to reach me.
+                {HOME_COPY.contact.text}
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <a href={`mailto:${profile.email}`} className={cn(buttonVariants(), pill)}>

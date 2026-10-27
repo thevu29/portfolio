@@ -41,10 +41,10 @@ export function Rise({ children, step = 0, className }: RiseProps) {
 }
 
 /**
- * Below-the-fold reveal tied to the scroll (CSS scroll-driven animation, see
- * .reveal in globals.css): rises in from below, drifts out at the top, and
- * plays back when scrolling up. No JS; static where unsupported or with
- * reduced motion. Use on item-sized blocks, not whole pages.
+ * Below-the-fold reveal (.reveal, driven by ScrollReveal): a timed entrance
+ * each time the block comes into view, from below on the way down and from
+ * above on the way up. Visible without JS; static with reduced motion. Use on
+ * item-sized blocks, not whole pages.
  */
 export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("reveal", className)}>{children}</div>;

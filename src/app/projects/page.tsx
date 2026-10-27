@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cv } from "@/content/cv";
+import { PROJECTS_COPY } from "@/content/pages";
 import { HeroFrame } from "@/components/hero-frame";
 import { PageContainer, PageHeader, Reveal } from "@/components/primitives";
 import { ProjectCard } from "@/components/project-card";
@@ -7,8 +8,8 @@ import { SpotlightCard } from "@/components/spotlight";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description:
-    "Selected client and product work: e-commerce, multi-project delivery, WMS and more.",
+  description: PROJECTS_COPY.metaDescription,
+  alternates: { canonical: "/projects", types: { "text/markdown": "/projects.md" } },
 };
 
 export default function ProjectsPage() {
@@ -17,8 +18,8 @@ export default function ProjectsPage() {
       <HeroFrame>
         <PageHeader
           eyebrow="Projects"
-          title="Things I've built"
-          description="Client and product work from the last two years. Most of it is under NDA, so the details stay at the level of what I built and the stack I used."
+          title={PROJECTS_COPY.title}
+          description={PROJECTS_COPY.description}
         />
       </HeroFrame>
       <PageContainer className="mt-8">

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cv } from "@/content/cv";
+import { SITE_DESCRIPTION as description } from "@/content/pages";
 import { SiteNav } from "@/components/site-nav";
-import { MotionProvider } from "@/components/reveal";
+import { MotionProvider, ScrollReveal } from "@/components/reveal";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { SpotlightBackground } from "@/components/spotlight";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { VtDebug } from "@/components/vt-debug";
 import { metadataBaseUrl, siteUrl } from "@/lib/site";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -15,7 +15,6 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const { profile } = cv;
-const description = `${profile.title} building web applications end to end with React, Next.js and NestJS.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
@@ -61,12 +60,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SpotlightBackground />
-        {/* TEMPORARY: ?vtdebug=1 on-device view-transition diagnostics. */}
-        <VtDebug />
         <SmoothScroll>
           <MotionProvider>
             <TooltipProvider delay={200}>
               <SiteNav />
+              <ScrollReveal />
               <div id="content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
                 {children}
               </div>

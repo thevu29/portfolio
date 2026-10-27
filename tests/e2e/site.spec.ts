@@ -553,49 +553,124 @@ test.describe("mobile", () => {
 });
 
 test.describe("scroll reveal", () => {
-  /** Scroll-driven animations on an element: name and timeline. */
-  const revealAnimations = (page: Page, selector: string) =>
-    page
-      .locator(selector)
-      .first()
+  // :visible: the router keeps pages visited before mounted but hidden.
+  const roles = (page: Page) => page.locator("article li.reveal:visible");
+  const state = (page: Page, index: number) => roles(page).nth(index).getAttribute("data-reveal");
+
+  /** The running entrance transition on a block: duration and starting translate. */
+  const entrance = (page: Page, index: number) =>
+    roles(page)
+      .nth(index)
       .evaluate((el) =>
-        el.getAnimations().map((a) => ({
-          name: (a as CSSAnimation).animationName,
-          scrollLinked: !(a.timeline instanceof DocumentTimeline),
-        })),
+        el
+          .getAnimations()
+          .filter((a) => (a as CSSTransition).transitionProperty === "translate")
+          .map((a) => {
+            const effect = a.effect as KeyframeEffect;
+            return {
+              duration: Number(effect.getComputedTiming().duration),
+              from: String(effect.getKeyframes()[0]?.translate),
+            };
+          }),
       );
 
-  test("timeline roles and section headings reveal with the scroll, both ways", async ({
-    page,
-  }) => {
+  const scrollTo = (page: Page, y: "top" | "bottom") =>
+    page.evaluate((to) => {
+      window.scrollTo({ top: to === "top" ? 0 : document.body.scrollHeight, behavior: "instant" });
+    }, y);
+
+  /** Opens a page once ScrollReveal has marked its blocks (hydrated). */
+  const open = async (page: Page, path: string) => {
+    await page.goto(path);
+    await expect(page.locator(".reveal[data-reveal]").first()).toBeAttached({ timeout: 15_000 });
+  };
+
+  test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto("/about");
-    for (const selector of ["article li.reveal", "section .reveal"]) {
-      const animations = await revealAnimations(page, selector);
-      expect(animations).toEqual(
-        expect.arrayContaining([
-          { name: "reveal-in", scrollLinked: true },
-          { name: "reveal-out", scrollLinked: true },
-        ]),
-      );
-    }
   });
 
   test("content below the fold starts hidden and shows once scrolled to", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.setViewportSize({ width: 430, height: 932 }); // iPhone Pro Max
-    await page.goto("/about");
-    const lastRole = page.locator("article li.reveal").last();
-    const opacity = () => lastRole.evaluate((el) => Number(getComputedStyle(el).opacity));
-    expect(await opacity()).toBeLessThan(0.1);
-    await lastRole.evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await expect.poll(opacity).toBeGreaterThan(0.95);
+    await open(page, "/about");
+    const last = roles(page).last();
+    await expect(last).toHaveAttribute("data-reveal", "below");
+    await expect(last).toHaveCSS("opacity", "0");
+    await last.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect(last).toHaveAttribute("data-reveal", "in");
+    await expect(last).toHaveCSS("opacity", "1");
+  });
+
+  test("a sudden jump still plays the whole entrance, rising from below", async ({ page }) => {
+    await open(page, "/about");
+    const index = (await roles(page).count()) - 1;
+    await expect.poll(() => state(page, index)).toBe("below");
+    await roles(page)
+      .nth(index)
+      .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect.poll(() => state(page, index)).toBe("in");
+    const [transition] = await entrance(page, index);
+    expect(transition?.duration).toBeGreaterThanOrEqual(900);
+    expect(transition?.from).toMatch(/^0px \d+px$/); // positive: from below
+  });
+
+  test("scrolled past, a block hides above and drops back in from above", async ({ page }) => {
+    await open(page, "/about");
+    await roles(page)
+      .first()
+      .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect.poll(() => state(page, 0)).toBe("in");
+
+    await scrollTo(page, "bottom");
+    await expect.poll(() => state(page, 0)).toBe("above");
+
+    await roles(page)
+      .first()
+      .evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect.poll(() => state(page, 0)).toBe("in");
+    const [transition] = await entrance(page, 0);
+    expect(transition?.from).toMatch(/^0px -\d+px$/); // negative: from above
+  });
+
+  test("blocks that arrive together are staggered", async ({ page }) => {
+    await open(page, "/");
+    const cards = page.locator("section .grid > .reveal");
+    expect(await cards.count()).toBeGreaterThan(1);
+    await expect(cards.first()).toHaveAttribute("data-reveal", "below");
+    await cards
+      .first()
+      .evaluate((el) => el.parentElement?.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect(cards.first()).toHaveAttribute("data-reveal", "in");
+    const delays = await cards.evaluateAll((els) =>
+      els
+        .filter((el) => el.getAttribute("data-reveal") === "in")
+        .map((el) => (el as HTMLElement).style.transitionDelay),
+    );
+    expect(delays[0]).toBe("0ms");
+    expect(new Set(delays).size).toBeGreaterThan(1);
+  });
+
+  test("still runs after a client-side navigation", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveClass(/\blenis\b/); // hydrated
+    await nav(page).getByRole("link", { name: "About" }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(roles(page).last()).toHaveAttribute("data-reveal", "below");
+    // Home, kept hidden by the router, did not lose its state.
+    const hiddenMarkedAbove = await page
+      .locator("article li.reveal")
+      .evaluateAll(
+        (els) =>
+          els.filter((el) => !el.checkVisibility() && el.getAttribute("data-reveal") === "above")
+            .length,
+      );
+    expect(hiddenMarkedAbove).toBe(0);
   });
 
   test("is off under prefers-reduced-motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/about");
-    expect(await revealAnimations(page, ".reveal")).toEqual([]);
+    await page.waitForLoadState("networkidle"); // hydrated, effects ran
+    await expect(page.locator(".reveal[data-reveal]")).toHaveCount(0);
     await expect(page.locator(".reveal").last()).toHaveCSS("opacity", "1");
   });
 });

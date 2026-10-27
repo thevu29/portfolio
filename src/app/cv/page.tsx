@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DownloadIcon } from "lucide-react";
 import { cv, CV_PDF_FILENAME, CV_PDF_PATH, formatPeriod } from "@/content/cv";
+import { CV_DESCRIPTION } from "@/content/pages";
 import { HeroFrame } from "@/components/hero-frame";
 import { PageContainer, Reveal, Rise, Section, TechChips } from "@/components/primitives";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,7 +10,8 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "CV",
-  description: `CV of ${cv.profile.name}, ${cv.profile.title}.`,
+  description: CV_DESCRIPTION,
+  alternates: { canonical: "/cv", types: { "text/markdown": "/cv.md" } },
 };
 
 const link =

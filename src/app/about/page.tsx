@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cv } from "@/content/cv";
+import { ABOUT_DESCRIPTION } from "@/content/pages";
 import { EducationList, ExperienceList } from "@/components/experience-list";
 import { HeroFrame } from "@/components/hero-frame";
 import {
@@ -16,7 +17,8 @@ import { stackSkills } from "@/lib/tech";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `About ${cv.profile.name}: background, experience, education and stack.`,
+  description: ABOUT_DESCRIPTION,
+  alternates: { canonical: "/about", types: { "text/markdown": "/about.md" } },
 };
 
 export default function AboutPage() {
