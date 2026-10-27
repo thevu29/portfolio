@@ -165,6 +165,28 @@ test.describe("page slides (pages read in nav order)", () => {
     expect(next.start).toBeGreaterThanOrEqual(old.end);
   });
 
+  test("still slides where view-transition-class is ignored (iOS Safari)", async ({ page }) => {
+    // React tags the page with style.viewTransitionClass; on iOS that never
+    // matched, leaving the browser's default in-place crossfade (overlap).
+    await page.addInitScript(() => {
+      Object.defineProperty(CSSStyleDeclaration.prototype, "viewTransitionClass", {
+        configurable: true,
+        get: () => "",
+        set: () => {},
+      });
+    });
+    await page.goto("/");
+    await hydrated(page);
+    await recordSlides(page);
+    await nav(page).getByRole("link", { name: "About" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-slide", "forward");
+    await expect
+      .poll(() => slides(page))
+      .toEqual(expect.arrayContaining(["old:left", "new:right"]));
+    // Cleared once the slide is over.
+    await expect(page.locator("html")).not.toHaveAttribute("data-slide", { timeout: 3_000 });
+  });
+
   test("the nav stays put while the page slides", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("header").first()).toHaveCSS("view-transition-name", "site-header");
@@ -173,6 +195,7 @@ test.describe("page slides (pages read in nav order)", () => {
   test("no slide under reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
+    await hydrated(page);
     await nav(page).getByRole("link", { name: "Projects" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Things I've built" })).toBeVisible();
     const running = await page.evaluate(() =>

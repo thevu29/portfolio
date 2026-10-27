@@ -231,28 +231,41 @@ html[data-theme-switch] .site-header {
   --slide-fade-in: 280ms;
 }
 
-::view-transition-old(.nav-forward) {
+/*
+ * Keyed on <html data-slide> (set by NavLink), not on the .nav-forward class
+ * React puts on the page: iOS Safari ignored that class and played the
+ * default in-place crossfade. (*) covers whatever React named, root included.
+ */
+html[data-slide]::view-transition-old(site-header) {
+  display: none;
+}
+
+html[data-slide]::view-transition-new(site-header) {
+  animation: none;
+}
+
+html[data-slide="forward"]::view-transition-old(*) {
   --slide-offset: calc(var(--slide-distance) * -1);
   animation:
     var(--slide-fade-out) ease-in both page-fade reverse,
     var(--slide-duration) var(--slide-ease) both page-slide reverse;
 }
 
-::view-transition-new(.nav-forward) {
+html[data-slide="forward"]::view-transition-new(*) {
   --slide-offset: var(--slide-distance);
   animation:
     var(--slide-fade-in) ease-out var(--slide-fade-out) both page-fade,
     var(--slide-duration) var(--slide-ease) both page-slide;
 }
 
-::view-transition-old(.nav-back) {
+html[data-slide="back"]::view-transition-old(*) {
   --slide-offset: var(--slide-distance);
   animation:
     var(--slide-fade-out) ease-in both page-fade reverse,
     var(--slide-duration) var(--slide-ease) both page-slide reverse;
 }
 
-::view-transition-new(.nav-back) {
+html[data-slide="back"]::view-transition-new(*) {
   --slide-offset: calc(var(--slide-distance) * -1);
   animation:
     var(--slide-fade-in) ease-out var(--slide-fade-out) both page-fade,
