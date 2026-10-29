@@ -17,15 +17,12 @@ export function ProjectLinkCard({ project }: { project: Project }) {
   return (
     <NavLink
       href={projectAnchor(project.slug)}
-      aria-label={`${project.name} — ${project.subtitle}`}
+      aria-label={project.name}
       aria-describedby={summaryId}
       className={cn(card, "flex h-full flex-col focus-visible:outline-offset-4")}
     >
       <div className="flex items-center gap-2.5 px-2.5 pt-1.5 pb-3">
-        <h3 className="text-sm font-medium">
-          {project.name}
-          <span className="sr-only"> — {project.subtitle}</span>
-        </h3>
+        <h3 className="text-sm font-medium">{project.name}</h3>
         <span className="text-subtle ml-auto font-mono text-[11px]">
           {formatPeriod(project.period)}
         </span>
@@ -63,8 +60,7 @@ export function ProjectCard({ project }: { project: Project }) {
       <div className="px-2.5 pb-3 md:px-2 md:py-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 id={headingId} className="text-2xl font-medium tracking-tight">
-            {project.name}{" "}
-            <span className="text-muted-foreground font-normal">— {project.subtitle}</span>
+            {project.name}
           </h2>
           <p className="text-subtle font-mono text-xs">{formatPeriod(project.period)}</p>
         </div>

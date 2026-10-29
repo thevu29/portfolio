@@ -46,7 +46,7 @@ describe("renderCvPdf", () => {
         e.company.toUpperCase(),
         ...e.roles.map((r) => r.title.toUpperCase()),
       ]),
-      ...cv.projects.map((p) => p.subtitle),
+      ...cv.projects.map((p) => p.name),
       ...cv.education.map((e) => e.school.toUpperCase()),
     ];
     for (const value of expected) expect(text).toContain(value);

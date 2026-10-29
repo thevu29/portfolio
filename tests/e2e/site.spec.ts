@@ -348,7 +348,7 @@ test.describe("CV page", () => {
       for (const role of exp.roles) await expect(main).toContainText(role.title);
     }
     for (const project of cv.projects) {
-      await expect(main).toContainText(`${project.name} — ${project.subtitle}`);
+      await expect(main).toContainText(project.name);
     }
     for (const edu of cv.education) await expect(main).toContainText(edu.school);
   });
@@ -358,6 +358,12 @@ test.describe("CV page", () => {
     await expect(page.getByRole("link", { name: cv.profile.email }).first()).toBeVisible();
     await expect(page.locator("body")).not.toContainText(cv.profile.phone);
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+  });
+
+  test("has no Portfolio link (it stays in the PDF only)", async ({ page }) => {
+    await page.goto("/cv");
+    await expect(page.getByRole("link", { name: "GitHub" }).first()).toBeVisible();
+    await expect(page.locator("main").getByRole("link", { name: "Portfolio" })).toHaveCount(0);
   });
 
   test("Download PDF serves the generated PDF", async ({ page, request }) => {

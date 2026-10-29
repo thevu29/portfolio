@@ -37,6 +37,7 @@ describe("resolveTech", () => {
     expect(fallbacks).toEqual(
       [
         "AWS",
+        "AWS S3",
         "BullMQ",
         "CQRS",
         "E2E Testing",
@@ -45,7 +46,6 @@ describe("resolveTech", () => {
         "Microservices",
         "RESTful APIs",
         "SQL",
-        "Typesense",
         "Unit Testing",
         "Zustand",
       ].sort(),

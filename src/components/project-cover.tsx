@@ -14,7 +14,7 @@ export function ProjectCover({ project }: { project: Project }) {
       <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border">
         <Image
           src={project.image}
-          alt={`${project.name} — ${project.subtitle}`}
+          alt={project.name}
           fill
           sizes="(min-width: 640px) 480px, 100vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
@@ -34,10 +34,7 @@ export function ProjectCover({ project }: { project: Project }) {
       <div className="relative flex h-full flex-col justify-between p-5 sm:p-6">
         <p className="font-mono text-[11px] tracking-wide text-white/40">{stack}</p>
         <div className="transition-transform duration-500 ease-out group-hover:translate-x-1 motion-reduce:transition-none">
-          <p className="font-mono text-[11px] tracking-wide text-white/50 uppercase">
-            {project.subtitle}
-          </p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">{project.name}</p>
+          <p className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.name}</p>
         </div>
       </div>
     </div>

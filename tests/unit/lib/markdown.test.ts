@@ -76,7 +76,7 @@ describe("pageMarkdown", () => {
   it("projects lists every project with its stack", () => {
     const md = pageMarkdown("projects", cv, BASE);
     for (const project of cv.projects) {
-      expect(md).toContain(`## ${project.name} — ${project.subtitle}`);
+      expect(md).toContain(`## ${project.name}`);
       expect(md).toContain(`Tech stack: ${project.stack.join(", ")}`);
     }
   });

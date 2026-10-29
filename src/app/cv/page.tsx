@@ -5,7 +5,6 @@ import { CV_DESCRIPTION } from "@/content/pages";
 import { HeroFrame } from "@/components/hero-frame";
 import { PageContainer, Reveal, Rise, Section, TechChips } from "@/components/primitives";
 import { buttonVariants } from "@/components/ui/button";
-import { siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -99,13 +98,6 @@ export default function CvPage() {
                     GitHub
                   </a>
                 </li>
-                {siteUrl && (
-                  <li>
-                    <a href={siteUrl} className={link}>
-                      Portfolio
-                    </a>
-                  </li>
-                )}
               </ul>
             </Rise>
           </div>
@@ -161,10 +153,7 @@ export default function CvPage() {
             {projects.map((project) => (
               <Reveal key={project.slug}>
                 <article>
-                  <EntryHeader
-                    title={`${project.name} — ${project.subtitle}`}
-                    period={formatPeriod(project.period)}
-                  >
+                  <EntryHeader title={project.name} period={formatPeriod(project.period)}>
                     {project.role}
                   </EntryHeader>
                   <p className="mt-3 leading-relaxed">{project.description}</p>

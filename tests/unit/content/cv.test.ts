@@ -66,7 +66,12 @@ describe("cv content", () => {
       "Tools & DevOps",
       "Languages",
     ]);
-    expect(cv.projects.map((p) => p.slug)).toEqual(["ecommerce", "insurance-real-estate", "wms", "dating-app"]);
+    expect(cv.projects.map((p) => p.slug)).toEqual([
+      "ecommerce",
+      "insurance-real-estate",
+      "wms",
+      "dating-app",
+    ]);
     expect(cv.experience[0].roles.map((r) => r.title)).toEqual([
       "Software Engineer",
       "Software Engineer Intern",

@@ -76,9 +76,7 @@ function ProjectEntry({ project, first }: { project: Project; first: boolean }) 
     <View style={first ? undefined : styles.entryGap}>
       <View wrap={false} minPresenceAhead={MIN_PRESENCE_AHEAD}>
         <View style={styles.row}>
-          <Text style={styles.entryTitle}>
-            {project.name} — {project.subtitle}
-          </Text>
+          <Text style={styles.entryTitle}>{project.name}</Text>
           <Text style={styles.date}>{formatPeriod(project.period)}</Text>
         </View>
         <Text style={[styles.roleLine, styles.projectRole]}>{project.role}</Text>

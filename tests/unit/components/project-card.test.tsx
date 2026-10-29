@@ -12,12 +12,12 @@ vi.mock("next/navigation", () => ({
 const project = cv.projects[1];
 
 describe("ProjectCard (projects page)", () => {
-  it("is an anchor target with title, subtitle, period, role and description", () => {
+  it("is an anchor target with title, period, role and description", () => {
     render(<ProjectCard project={project} />);
     const card = screen.getByRole("article", { name: /Insurance & Real Estate Platforms/ });
     expect(card).toHaveAttribute("id", project.slug);
     expect(within(card).getByRole("heading", { level: 2 })).toHaveTextContent(
-      "Insurance & Real Estate Platforms — Multi-project Portfolio",
+      "Insurance & Real Estate Platforms",
     );
     expect(card).toHaveTextContent("03/2026 - 09/2026");
     expect(card).toHaveTextContent(project.role);
@@ -32,7 +32,9 @@ describe("ProjectCard (projects page)", () => {
 
   it("renders every tech chip as text (no logos)", () => {
     render(<ProjectCard project={project} />);
-    const chips = screen.getByRole("list", { name: "Insurance & Real Estate Platforms tech stack" });
+    const chips = screen.getByRole("list", {
+      name: "Insurance & Real Estate Platforms tech stack",
+    });
     expect(
       within(chips)
         .getAllByRole("listitem")
@@ -47,13 +49,15 @@ describe("ProjectLinkCard (home page)", () => {
     render(<ProjectLinkCard project={project} />);
     const link = screen.getByRole("link", { name: /Insurance & Real Estate Platforms/ });
     expect(link).toHaveAttribute("href", "/projects#insurance-real-estate");
-    expect(within(link).getByRole("heading", { level: 3 })).toHaveTextContent("Insurance & Real Estate Platforms");
+    expect(within(link).getByRole("heading", { level: 3 })).toHaveTextContent(
+      "Insurance & Real Estate Platforms",
+    );
   });
 
   it("names the link by its title and describes it with the summary", () => {
     render(<ProjectLinkCard project={project} />);
     const link = screen.getByRole("link");
-    expect(link).toHaveAccessibleName("Insurance & Real Estate Platforms — Multi-project Portfolio");
+    expect(link).toHaveAccessibleName("Insurance & Real Estate Platforms");
     expect(link).toHaveAccessibleDescription(project.description);
   });
 

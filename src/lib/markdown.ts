@@ -107,7 +107,7 @@ function experience(cv: Cv, heading: string): string {
 
 function project(p: Project, heading: string): string {
   return [
-    `${heading} ${p.name} — ${p.subtitle}`,
+    `${heading} ${p.name}`,
     `${p.role} · ${periodText(p.period)}`,
     p.description,
     list(p.bullets),
@@ -134,11 +134,7 @@ function home(cv: Cv, base: string): string {
     `Hi, I'm ${profile.greetingName}: ${profile.name}, ${profile.title} in ${profile.location}. ${HOME_COPY.intro}`,
     `## ${HOME_COPY.work.title}`,
     HOME_COPY.work.description,
-    list(
-      projects.map(
-        (p) => `[${p.name} — ${p.subtitle}](${abs(`/projects#${p.slug}`, base)}): ${p.description}`,
-      ),
-    ),
+    list(projects.map((p) => `[${p.name}](${abs(`/projects#${p.slug}`, base)}): ${p.description}`)),
     `More detail: [Projects](${abs("/projects.md", base)}).`,
     experience(cv, "##"),
     `## ${HOME_COPY.contact.title}`,

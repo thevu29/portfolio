@@ -26,7 +26,6 @@ export type Experience = {
 export type Project = {
   slug: string;
   name: string;
-  subtitle: string;
   role: string;
   period: Period;
   description: string;
@@ -172,21 +171,34 @@ export const cv: Cv = {
     {
       slug: "ecommerce",
       name: "E-commerce Platform",
-      subtitle: "E-commerce Platform",
       role: "Full-Stack Developer",
       period: { start: "10/2026", end: PRESENT },
       description: "An e-commerce platform for luggage and travel products.",
       bullets: [
         "Built responsive storefront pages from Figma designs with Next.js.",
-        "Developed backend features and e-commerce business logic with NestJS.",
-        "Integrated Typesense to deliver fast, typo-tolerant product search.",
+        "Developed backend features and e-commerce business logic with Spring Boot.",
+        "Integrated Elasticsearch to deliver fast, typo-tolerant product search.",
+        "Cached shopping carts in Redis and used idempotency to handle race conditions when only one unit of a product is left in stock.",
       ],
-      stack: ["Next.js", "NestJS", "Typesense", "Strapi", "Cloudflare", "AWS", "PostgreSQL"],
+      stack: [
+        "Next.js",
+        "React",
+        "TailwindCSS",
+        "Zustand",
+        "TanStack Query",
+        "Spring Boot",
+        "Elasticsearch",
+        "RabbitMQ",
+        "Socket.IO",
+        "Redis",
+        "PostgreSQL",
+        "Cloudflare",
+        "AWS",
+      ],
     },
     {
       slug: "insurance-real-estate",
       name: "Insurance & Real Estate Platforms",
-      subtitle: "Multi-project Portfolio",
       role: "Full-Stack Developer",
       period: { start: "03/2026", end: "09/2026" },
       description:
@@ -201,13 +213,20 @@ export const cv: Cv = {
       stack: [
         "React",
         "Next.js",
+        "TailwindCSS",
+        "Zustand",
+        "TanStack Query",
         "NestJS",
         "Socket.IO",
         "Sanity",
         "BullMQ",
         "Redis",
         "RabbitMQ",
+        "Resend",
+        "Supabase",
         "Cloudflare",
+        "Railway",
+        "GitHub Actions",
         "PostgreSQL",
         "MariaDB",
       ],
@@ -215,7 +234,6 @@ export const cv: Cv = {
     {
       slug: "wms",
       name: "Warehouse Management System",
-      subtitle: "Warehouse Management System (WMS)",
       role: "Full-Stack Developer",
       period: { start: "12/2025", end: "02/2026" },
       description:
@@ -226,12 +244,11 @@ export const cv: Cv = {
         "Investigated, debugged, and resolved application issues across frontend and backend components.",
         "Continuously resolved SonarQube issues during development, raising code quality and maintainability.",
       ],
-      stack: ["React", "Spring Boot", "Keycloak", "RabbitMQ", "PostgreSQL"],
+      stack: ["React", "TailwindCSS", "Spring Boot", "Keycloak", "RabbitMQ", "PostgreSQL"],
     },
     {
       slug: "dating-app",
       name: "Dating Application",
-      subtitle: "Dating Application",
       role: "Backend Developer",
       period: { start: "06/2025", end: "10/2025" },
       description:
@@ -244,7 +261,18 @@ export const cv: Cv = {
         "Refactored existing code to improve maintainability and performance.",
         "Built a React analytics dashboard giving Product Owners and Marketing visibility into traffic, revenue, and user metrics.",
       ],
-      stack: ["NestJS", "GraphQL", "PostgreSQL", "Redis", "Socket.IO", "React", "Flutter"],
+      stack: [
+        "NestJS",
+        "GraphQL",
+        "PostgreSQL",
+        "Redis",
+        "Socket.IO",
+        "AWS S3",
+        "React",
+        "Next.js",
+        "TailwindCSS",
+        "Flutter",
+      ],
     },
   ],
   education: [
