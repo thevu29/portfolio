@@ -10,6 +10,9 @@ export const LINK_COLOR = "#0000ff";
 // react-pdf resolves unitless lineHeight against the style's own fontSize
 // (default 18pt), so every text style that sets lineHeight sets fontSize too.
 const BODY_SIZE = px(13.33);
+// Canva body text (summary, bullets, skills, project text) is set to line height
+// 1.4, which its export renders at ~1.35 × font size; calibrated to match.
+const BODY_LINE_HEIGHT = 1.35;
 
 // Gaps in Canva px, calibrated against the Canva PDF export: Canva's text
 // boxes trim trailing leading, so a few values differ from the editor numbers.
@@ -72,7 +75,7 @@ export const styles = StyleSheet.create({
     lineHeight: 1.15,
     marginBottom: gap.headingToContent,
   },
-  paragraph: { fontSize: BODY_SIZE, lineHeight: 1.5 },
+  paragraph: { fontSize: BODY_SIZE, lineHeight: BODY_LINE_HEIGHT },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -101,8 +104,13 @@ export const styles = StyleSheet.create({
   companyToRole: { marginTop: gap.companyToRole },
   projectRole: { marginTop: gap.projectRole },
   bulletRow: { flexDirection: "row" },
-  bulletDot: { width: px(23), paddingLeft: px(6), fontSize: BODY_SIZE, lineHeight: 1.5 },
-  bulletText: { flex: 1, fontSize: BODY_SIZE, lineHeight: 1.5 },
+  bulletDot: {
+    width: px(23),
+    paddingLeft: px(6),
+    fontSize: BODY_SIZE,
+    lineHeight: BODY_LINE_HEIGHT,
+  },
+  bulletText: { flex: 1, fontSize: BODY_SIZE, lineHeight: BODY_LINE_HEIGHT },
   bold: { fontWeight: 700 },
   roleGap: { marginTop: gap.roles },
   entryGap: { marginTop: gap.entries },

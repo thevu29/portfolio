@@ -19,7 +19,7 @@ describe("ProjectCard (projects page)", () => {
     expect(within(card).getByRole("heading", { level: 2 })).toHaveTextContent(
       "Insurance & Real Estate Platforms",
     );
-    expect(card).toHaveTextContent("03/2026 - 09/2026");
+    expect(card).toHaveTextContent("03/2026 - present");
     expect(card).toHaveTextContent(project.role);
     expect(card).toHaveTextContent(project.description);
   });

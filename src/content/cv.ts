@@ -200,7 +200,7 @@ export const cv: Cv = {
       slug: "insurance-real-estate",
       name: "Insurance & Real Estate Platforms",
       role: "Full-Stack Developer",
-      period: { start: "03/2026", end: "09/2026" },
+      period: { start: "03/2026", end: PRESENT },
       description:
         "Developed and delivered websites and web applications for a Swiss business group operating across insurance, real estate, and related services, from initial project setup to client delivery.",
       bullets: [
