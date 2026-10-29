@@ -13,7 +13,7 @@ export const CV_DESCRIPTION = `CV of ${profile.name}, ${profile.title}.`;
 export const HOME_COPY = {
   headline: "Software engineer building reliable web products.",
   intro:
-    "Full-stack with React and Next.js up front, NestJS services, queues and caches behind them, and a bias for code that stays easy to change.",
+    "Full-stack with React and Next.js up front, NestJS and Spring Boot services, queues and caches behind them, and a bias for code that stays easy to change.",
   work: {
     eyebrow: "Selected work",
     title: "Things I've shipped",
