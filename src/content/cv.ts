@@ -173,7 +173,7 @@ export const cv: Cv = {
       name: "E-commerce Platform",
       role: "Full-Stack Developer",
       period: { start: "10/2026", end: PRESENT },
-      description: "An e-commerce platform for luggage and travel products.",
+      description: "An e-commerce platform.",
       bullets: [
         "Built responsive storefront pages from Figma designs with Next.js.",
         "Developed backend features and e-commerce business logic with Spring Boot.",
