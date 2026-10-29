@@ -356,10 +356,12 @@ html[data-theme-switch="sunset"]::view-transition-old(root) {
  * on the way down it rises in from below, on the way up it drops in from
  * above. Hiding is instant (offscreen); only showing transitions. No
  * data-reveal (no JS, reduced motion) means plainly visible. Not used around
- * StackPhysics: scale would skew its pointer maths.
+ * StackPhysics: scale would skew its pointer maths. Compositor-only properties
+ * on purpose: a filter (blur) transition re-renders every frame on the main
+ * thread and halved the frame rate while scrolling.
  */
 .reveal[data-reveal] {
-  transition-property: opacity, translate, scale, filter;
+  transition-property: opacity, translate, scale;
   transition-duration: 0s;
 }
 
@@ -367,20 +369,18 @@ html[data-theme-switch="sunset"]::view-transition-old(root) {
   opacity: 0;
   translate: 0 88px;
   scale: 0.92;
-  filter: blur(6px);
 }
 
 .reveal[data-reveal="above"] {
   opacity: 0;
   translate: 0 -64px;
   scale: 0.95;
-  filter: blur(6px);
 }
 
 .reveal[data-reveal="in"] {
-  transition-duration: 700ms, 1000ms, 1000ms, 700ms;
+  transition-duration: 700ms, 1000ms, 1000ms;
   transition-timing-function:
-    ease-out, cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease-out;
+    ease-out, cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -388,7 +388,6 @@ html[data-theme-switch="sunset"]::view-transition-old(root) {
     opacity: 1;
     translate: none;
     scale: none;
-    filter: none;
     transition: none;
   }
 }

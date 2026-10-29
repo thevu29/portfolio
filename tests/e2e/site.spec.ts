@@ -619,6 +619,22 @@ test.describe("scroll reveal", () => {
     expect(transition?.from).toMatch(/^0px \d+px$/); // positive: from below
   });
 
+  test("the entrance animates compositor-only properties (no filter)", async ({ page }) => {
+    await open(page, "/about");
+    const index = (await roles(page).count()) - 1;
+    const last = roles(page).nth(index);
+    await expect.poll(() => state(page, index)).toBe("below");
+    await expect(last).toHaveCSS("filter", "none");
+    await last.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+    await expect.poll(() => state(page, index)).toBe("in");
+    const properties = await last.evaluate((el) =>
+      el.getAnimations().map((a) => (a as CSSTransition).transitionProperty),
+    );
+    expect(properties.length).toBeGreaterThan(0);
+    for (const property of properties)
+      expect(["opacity", "translate", "scale"]).toContain(property);
+  });
+
   test("scrolled past, a block hides above and drops back in from above", async ({ page }) => {
     await open(page, "/about");
     await roles(page)
